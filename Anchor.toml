@@ -2,12 +2,14 @@
 seeds = false
 [programs.localnet]
 solana_tic_tac_toe = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+[programs.devnet]
+solana_tic_tac_toe = "9163nkVWAADRHwSsK4NsbXEZ7UvqWXTR4inGDfustd5v"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "/Users/gr8/.config/solana/id.json"
 
 [scripts]
