@@ -40,8 +40,8 @@ impl Game {
         require!(self.is_game_active(), TicTacToeError::GameNotActive);
         tile.validate()?;
 
-        match self.board[tile.y][tile.x] {
-            None => self.board[tile.y][tile.x] = Some(Sign::try_from_idx(player_idx)?),
+        match self.board[tile.y as usize][tile.x as usize] {
+            None => self.board[tile.y as usize][tile.x as usize] = Some(Sign::try_from_idx(player_idx)?),
             Some(_) => err!(TicTacToeError::TileNotEmpty)?,
         }
 
@@ -117,8 +117,8 @@ impl Game {
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct Tile {
-    x: usize,
-    y: usize,
+    x: u8,
+    y: u8,
 }
 
 impl Tile {
@@ -185,7 +185,6 @@ pub struct StartGame<'info> {
 #[derive(Accounts)]
 pub struct PlayGame<'info> {
     #[account(mut)]
-    pub game: Account<'info, Game>,
-
+    game: Account<'info, Game>,
     player: Signer<'info>,
 }
