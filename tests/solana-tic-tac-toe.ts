@@ -17,7 +17,7 @@ describe("solana-tic-tac-toe", () => {
       .rpc();
   }
 
-  it('must start game', async() => {
+  it('should start game', async() => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = (program.provider as anchor.AnchorProvider).wallet;
     const playerTwo = anchor.web3.Keypair.generate();
@@ -41,7 +41,7 @@ describe("solana-tic-tac-toe", () => {
     ]);
   });
 
-  it('1st must win', async () => {
+  it('should win by 1st player', async () => {
     const gameKeypair = anchor.web3.Keypair.generate();
     const playerOne = (program.provider as anchor.AnchorProvider).wallet;
     const playerTwo = anchor.web3.Keypair.generate();

@@ -1,7 +1,7 @@
 [features]
 seeds = false
 [programs.localnet]
-solana_tic_tac_toe = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+solana_tic_tac_toe = "9163nkVWAADRHwSsK4NsbXEZ7UvqWXTR4inGDfustd5v"
 [programs.devnet]
 solana_tic_tac_toe = "9163nkVWAADRHwSsK4NsbXEZ7UvqWXTR4inGDfustd5v"
 
@@ -9,7 +9,7 @@ solana_tic_tac_toe = "9163nkVWAADRHwSsK4NsbXEZ7UvqWXTR4inGDfustd5v"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "/Users/gr8/.config/solana/id.json"
 
 [scripts]
