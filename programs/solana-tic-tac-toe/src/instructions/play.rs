@@ -2,7 +2,8 @@ use anchor_lang::prelude::*;
 use crate::state::{Tile, Game};
 
 pub fn play(ctx: Context<PlayGame>, tile: Tile) -> Result<()> {
-  ctx.accounts.game.play(ctx.accounts.player.key(), tile)
+  let game_key = ctx.accounts.game.key();
+  ctx.accounts.game.play(game_key, ctx.accounts.player.key(), tile)
 }
 
 #[derive(Accounts)]

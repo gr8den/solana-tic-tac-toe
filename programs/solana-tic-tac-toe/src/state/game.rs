@@ -12,15 +12,20 @@ pub struct Game {
 impl Game {
     pub const MAX_SIZE: usize = 1 + (32 * 2) + ((1 + 1) * 9) + (1 + 32);
 
-    pub fn start(&mut self, players: [Pubkey; 2]) -> Result<()> {
+    pub fn start(&mut self, game_key: Pubkey, players: [Pubkey; 2]) -> Result<()> {
         require_eq!(self.turn, 0, TicTacToeError::AlreadyInited);
         self.players = players;
         self.turn += 1;
 
+        emit!(NewGame {
+            game: game_key,
+            player_two: players[1],
+        });
+
         Ok(())
     }
 
-    pub fn play(&mut self, player_key: Pubkey, tile: Tile) -> Result<()> {
+    pub fn play(&mut self, game_key: Pubkey, player_key: Pubkey, tile: Tile) -> Result<()> {
         let player_idx = self.key_to_player_idx(player_key)?;
         require_eq!(player_idx, self.turn_of_player(), TicTacToeError::NotPlayersTurn);
         require!(self.is_game_active(), TicTacToeError::GameNotActive);
@@ -45,6 +50,13 @@ impl Game {
                 }
             }
         }
+
+        emit!(StateUpdated {
+            game: game_key,
+            turn: self.turn,
+            board: self.board,
+            status: self.status.clone(),
+        });
 
         Ok(())
     }
@@ -144,4 +156,18 @@ impl Sign {
             Sign::O => 1,
         }
     }
+}
+
+#[event]
+struct StateUpdated {
+    game: Pubkey,
+    turn: u8,
+    board: [[Option<Sign>; 3]; 3],
+    status: GameStatus,
+}
+
+#[event]
+struct NewGame {
+    game: Pubkey,
+    player_two: Pubkey,
 }

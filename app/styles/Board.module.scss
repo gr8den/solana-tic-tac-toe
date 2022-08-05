@@ -1,0 +1,23 @@
+
+table.board {
+  border-collapse: collapse;
+  --size: 2rem;
+
+  tr {
+    height: var(--size);
+  }
+
+  td {
+    border: 1px solid #ccc;
+    margin: 0;
+    width: var(--size);
+    height: var(--size);
+    text-align: center;
+    cursor: default;
+
+    &.available {
+      color: #999;
+      cursor: pointer;
+    }
+  }
+}

@@ -2,7 +2,8 @@ use anchor_lang::prelude::*;
 use crate::state::Game;
 
 pub fn start_game(ctx: Context<StartGame>, player_two: Pubkey) -> Result<()> {
-  ctx.accounts.game.start([ctx.accounts.player_one.key(), player_two])
+  let game_key = ctx.accounts.game.key();
+  ctx.accounts.game.start(game_key, [ctx.accounts.player_one.key(), player_two])
 }
 
 #[derive(Accounts)]
