@@ -16,7 +16,9 @@ pub mod solana_tic_tac_toe {
         instructions::play(ctx, tile)
     }
 
-    pub fn start_game(ctx: Context<StartGame>, player_two: Pubkey) -> Result<()> {
-        instructions::start_game(ctx, player_two)
+    pub fn start_game(ctx: Context<StartGame>, player_two: Pubkey, admin_bump: u8) -> Result<()> {
+        instructions::inc_games_count(&ctx, admin_bump)?;
+        instructions::start_game(ctx, player_two)?;
+        Ok(())
     }
 }

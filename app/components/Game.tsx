@@ -3,12 +3,16 @@ import { PublicKey } from '@solana/web3.js';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
-import { IDL } from "../types/solana_tic_tac_toe";
+import { IDL as GameIDL } from "../idl/solana_tic_tac_toe";
+import { IDL as StatsIDL } from "../idl/stats";
+import { GameStatus, IBoard, IStats, Tile } from '../types/game';
 import { AddressInput } from './AddressInput';
 import { Board } from './Board';
-import { GameStatus, IBoard, Tile } from '../types/game';
+import { Stats } from './Stats';
+import { makeAdminPDA, makeStatsPDA } from '../utils';
 
 const programId = new PublicKey('9163nkVWAADRHwSsK4NsbXEZ7UvqWXTR4inGDfustd5v');
+const statsProgramId = new PublicKey('TicQkEcbikbk4K5LpMthVWhsZNmrJnopA9mcupg5qcr');
 type DeployStatus = 'none' | 'progress' | 'done';
 
 export const Game: FC = () => {
@@ -25,6 +29,7 @@ export const Game: FC = () => {
     const [winner, setWinner] = useState<PublicKey | null>(null);
     const [turn, setTurn] = useState(0);
     const [playProgress, setPlayProgress] = useState(false);
+    const [stats, setStats] = useState<IStats | null>(null);
 
     const { connection } = useConnection();
     const anchorWallet = useAnchorWallet();
@@ -40,15 +45,16 @@ export const Game: FC = () => {
         return new anchor.AnchorProvider(connection, anchorWallet, anchor.AnchorProvider.defaultOptions())
     }, [anchorWallet, connection]);
 
-    useEffect(() => {
-        if(!provider) return;
-        anchor.setProvider(provider);
-    }, [provider]);
-
     const program = useMemo(() => {
         if(!provider) return;
 
-        return new Program(IDL, programId, provider);
+        return new Program(GameIDL, programId, provider);
+    }, [provider]);
+
+    const statsProgram = useMemo(() => {
+        if(!provider) return;
+
+        return new Program(StatsIDL, statsProgramId, provider);
     }, [provider]);
 
     async function setState(state: any) {
@@ -62,6 +68,11 @@ export const Game: FC = () => {
         setStatus(status);
         setWinner(status === 'won' ? (state.status as any).won.winner : null);
     }
+
+    useEffect(() => {
+        if(!provider) return;
+        anchor.setProvider(provider);
+    }, [provider]);
 
     useEffect(() => {
         if(!program || !gameAddress || startStatus !== 'done') return;
@@ -114,20 +125,52 @@ export const Game: FC = () => {
         };
     }, [program, gameAddress, startStatus, anchorWallet]);
 
+    // update stats
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            if(stats || !statsProgram) return;
+
+            console.log('updating stats...');
+            const [statsAccount,] = await makeStatsPDA(statsProgramId);
+            const newStats = await statsProgram.account.statsData.fetch(statsAccount);
+            if(cancelled) return;
+
+            console.log('stats updated', newStats);
+            setStats(newStats as any);
+        })();
+
+        return () => { cancelled = true };
+    }, [stats, statsProgram, gameAddress]);
+
     const startGame = useCallback(async () => {
-        if(!anchorWallet || !playerTwoAddress || !program) return;
+        if(!anchorWallet || !playerTwoAddress || !program || !statsProgram) return;
 
         setStartStatus(() => 'progress');
         try {
             const gameKeypair = anchor.web3.Keypair.generate();
 
-            await program.methods.startGame(playerTwoAddress)
+            const [adminPDAPub, adminBump] = await makeAdminPDA(programId);
+            const [statsAccount,] = await makeStatsPDA(statsProgramId);
+
+            const txHash = await program.methods.startGame(playerTwoAddress, adminBump)
                 .accounts({
                     game: gameKeypair.publicKey,
                     playerOne: anchorWallet.publicKey,
+                    stats: statsAccount,
+                    statsProgram: statsProgramId,
+                    admin: adminPDAPub,
                 })
                 .signers([gameKeypair])
                 .rpc();
+
+
+            console.log('game started', txHash);
+            console.log('status: ', await program.provider.connection.getSignatureStatus(txHash).then(o => o.value));
+            // await program.provider.connection
+
+            // const newStats = await statsProgram.account.statsData.fetch(statsAccount);
+            // setStats(newStats as any);
 
             setStartStatus('done');
             setGameAddress(gameKeypair.publicKey);
@@ -137,7 +180,7 @@ export const Game: FC = () => {
             console.error('error in deploy', err);
             setStartStatus(() => 'progress');
         }
-    }, [program, anchorWallet, playerTwoAddress]);
+    }, [program, statsProgram, anchorWallet, playerTwoAddress]);
 
     const joinGame = useCallback(async () => {
         if(!anchorWallet || !gameAddress || !program) return;
@@ -160,17 +203,18 @@ export const Game: FC = () => {
     }, [program, anchorWallet, gameAddress]);
 
     const play = useCallback(async (tile: Tile) => {
+        if(!program) return;
+
         try {
             setPlayProgress(true);
 
-            const program = new Program(IDL, programId);
             await program.methods.play(tile)
                 .accounts({ game: gameAddress! })
                 .rpc()
         } finally {
             setPlayProgress(false);
         }
-    }, [gameAddress]);
+    }, [program, gameAddress]);
 
     const showStartGameEl = anchorWallet && startStatus !== 'done';
     const canStartGame = startStatus === 'none' && playerTwoAddress;
@@ -228,6 +272,7 @@ export const Game: FC = () => {
             <div>ProgramId: {programId.toBase58()}</div>
             { startGameEl }
             { gameInfo }
+            { stats && <Stats stats={stats} /> }
         </>
     );
 };

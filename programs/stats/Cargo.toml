@@ -1,12 +1,12 @@
 [package]
-name = "solana-tic-tac-toe"
+name = "stats"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "solana_tic_tac_toe"
+name = "stats"
 
 [features]
 no-entrypoint = []
@@ -20,5 +20,3 @@ overflow-checks = true
 
 [dependencies]
 anchor-lang = "0.25.0"
-bytemuck = "1.12.3"
-stats = { path = "../stats", features = ["cpi"]}

@@ -39,6 +39,21 @@ export type SolanaTicTacToe = {
           "isSigner": true
         },
         {
+          "name": "stats",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "statsProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -48,6 +63,10 @@ export type SolanaTicTacToe = {
         {
           "name": "playerTwo",
           "type": "publicKey"
+        },
+        {
+          "name": "adminBump",
+          "type": "u8"
         }
       ]
     }
@@ -285,6 +304,21 @@ export const IDL: SolanaTicTacToe = {
           "isSigner": true
         },
         {
+          "name": "stats",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "statsProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -294,6 +328,10 @@ export const IDL: SolanaTicTacToe = {
         {
           "name": "playerTwo",
           "type": "publicKey"
+        },
+        {
+          "name": "adminBump",
+          "type": "u8"
         }
       ]
     }
